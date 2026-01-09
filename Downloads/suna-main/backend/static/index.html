@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>AI Worker Interface</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and base styles */
+        *, ::before, ::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        html {
+            line-height: 1.5;
+            font-family: Poppins, sans-serif;
+        }
+
+        body {
+            background: #0D0D0D;
+            color: #F5F5F5;
+            font-family: Poppins, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Utility classes */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+        .pb-2 { padding-bottom: 0.5rem; }
+        .pb-6 { padding-bottom: 1.5rem; }
+        .pt-0 { padding-top: 0; }
+        .pt-4 { padding-top: 1rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-12 { margin-bottom: 3rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-auto { margin-top: auto; }
+        .ml-0\.5 { margin-left: 0.125rem; }
+        .mr-1 { margin-right: 0.25rem; }
+        .w-3 { width: 0.75rem; }
+        .w-4 { width: 1rem; }
+        .w-6 { width: 1.5rem; }
+        .w-8 { width: 2rem; }
+        .w-9 { width: 2.25rem; }
+        .w-16 { width: 4rem; }
+        .w-32 { width: 8rem; }
+        .w-full { width: 100%; }
+        .max-w-3xl { max-width: 48rem; }
+        .max-w-4xl { max-width: 56rem; }
+        .max-w-5xl { max-width: 64rem; }
+        .h-6 { height: 1.5rem; }
+        .h-8 { height: 2rem; }
+        .h-9 { height: 2.25rem; }
+        .h-14 { height: 3.5rem; }
+        .h-32 { height: 8rem; }
+        .h-screen { height: 100vh; }
+        .min-h-60px { min-height: 3.75rem; }
+        .min-h-[140px] { min-height: 8.75rem; }
+        .shrink-0 { flex-shrink: 0; }
+        .flex-1 { flex: 1 1 0%; }
+        .cursor-pointer { cursor: pointer; }
+        .rounded { border-radius: 0.25rem; }
+        .rounded-8px { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-full { border-radius: 9999px; }
+        .border { border-width: 1px; }
+        .border-transparent { border-color: transparent; }
+        .bg-transparent { background-color: transparent; }
+        .bg-black { background-color: #000000; }
+        .text-black { color: #000000; }
+        .text-white { color: #ffffff; }
+        .text-gray-400 { color: #9ca3af; }
+        .text-gray-500 { color: #6b7280; }
+        .text-center { text-align: center; }
+        .font-medium { font-weight: 500; }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .leading-tight { line-height: 1.25; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .transition-all { transition: all 0.2s ease; }
+        .transition-colors { transition: color 0.2s ease, background-color 0.2s ease; }
+        .duration-200 { transition-duration: 200ms; }
+        .duration-300 { transition-duration: 300ms; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-x-auto { overflow-x: auto; }
+        .overflow-y-auto { overflow-y: auto; }
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .lg\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .col-span-1 { grid-column: span 1 / span 1; }
+        .gap-4 { gap: 1rem; }
+        .fixed { position: fixed; }
+        .absolute { position: absolute; }
+        .relative { position: relative; }
+        .bottom-6 { bottom: 1.5rem; }
+        .right-6 { right: 1.5rem; }
+        .bottom-4 { bottom: 1rem; }
+        .right-4 { right: 1rem; }
+        .z-50 { z-index: 50; }
+        .z-10 { z-index: 10; }
+        .opacity-0 { opacity: 0; }
+        .bg-\\[\\#0D0D0D\\] { background-color: #0D0D0D; }
+        .bg-\\[\\#151515\\] { background-color: #151515; }
+        .bg-\\[\\#1A1A1A\\] { background-color: #1A1A1A; }
+        .bg-\\[\\#222\\] { background-color: #222222; }
+        .bg-\\[\\#2A2A2A\\] { background-color: #2A2A2A; }
+        .bg-\\[\\#333\\] { background-color: #333333; }
+        .text-\\[\\#F5F5F5\\] { color: #F5F5F5; }
+        .text-\\[\\#A0A0A0\\] { color: #A0A0A0; }
+        .text-\\[\\#555\\] { color: #555555; }
+        .border-\\[\\#2A2A2A\\] { border-color: #2A2A2A; }
+        .border-\\[\\#333\\] { border-color: #333333; }
+        .hover\\:bg-\\[\\#1A1A1A\\] { }
+        .hover\\:bg-\\[\\#2A2A2A\\] { }
+        .hover\\:bg-\\[\\#333\\] { }
+        .hover\\:text-\\[\\#F5F5F5\\] { }
+        .focus\\:ring-0 { }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+    <style>
+        .tool-button {
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .tool-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        .tool-button.active {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+        .advanced-row {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .advanced-row .tool-button {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            font-size: 11px;
+            padding: 6px 10px;
+        }
+        .advanced-row .tool-button:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .template-editor {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            animation: slideInUp 0.3s ease-out;
+        }
+        .advanced-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .advanced-panel.visible {
+            opacity: 1;
+        }
+        .panel-overlay {
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        .panel-content {
+            padding: 2rem;
+            color: #ffffff;
+        }
+        .close-panel-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+        .close-panel-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        .integrations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .integration-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .integration-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .connect-btn {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .connect-btn:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+        .tool-type-button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #A0A0A0;
+            cursor: pointer;
+        }
+        .tool-type-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #F5F5F5;
+        }
+        .tool-type-button.active {
+            background: #F5F5F5;
+            color: #0D0D0D;
+            border-color: #F5F5F5;
+        }
+        .advanced-tool-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: #A0A0A0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .advanced-tool-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #F5F5F5;
+            transform: translateY(-2px);
+        }
+        .tool-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .tool-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInFromRight 0.3s ease-out;
+        }
+        .message.success { background: rgba(16, 185, 129, 0.9); }
+        .message.error { background: rgba(239, 68, 68, 0.9); }
+        .message.info { background: rgba(59, 130, 246, 0.9); }
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="dark">
+    <div class="min-h-screen bg-[#0D0D0D] text-[#F5F5F5] font-sans overflow-hidden">
+        <!-- Top Navigation -->
+        <header class="h-14 border-b border-transparent flex items-center justify-between px-6 shrink-0">
+            <div class="flex items-center gap-2 cursor-pointer hover:bg-[#1A1A1A] px-2 py-1 rounded-md transition-colors">
+                <span class="font-bold text-lg">AURION CHAT</span>
+                <svg class="w-4 h-4 text-[#A0A0A0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col items-center justify-center p-8 max-w-5xl mx-auto w-full overflow-y-auto scrollbar-hide">
+
+            <!-- Hero Section -->
+            <h1 class="text-4xl font-bold mb-8 text-center tracking-tight">
+                Qu'est-ce que tu veux accomplir ?
+            </h1>
+
+            <!-- Upgrade Banner -->
+            <div class="w-full max-w-3xl bg-[#151515] border border-[#2A2A2A] rounded-xl p-4 mb-6 flex items-center justify-between relative">
+                <div class="flex items-center gap-3">
+                    <div class="bg-[#2A2A2A] text-[#A0A0A0] px-2 py-0.5 text-xs font-normal rounded">⌘ Plus</div>
+                    <div>
+                        <div class="font-medium text-sm">Unlock the full Kortix experience</div>
+                        <div class="text-xs text-[#A0A0A0]">Kortix Advanced mode, 100+ Integrations, Triggers, Custom AI Workers & more</div>
+                    </div>
+                </div>
+                <button class="h-6 w-6 text-[#A0A0A0] hover:text-[#F5F5F5]">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Main Input Area -->
+            <div class="w-full max-w-3xl relative mb-6">
+                <div class="bg-[#151515] border border-[#2A2A2A] rounded-2xl p-4 min-h-[140px] flex flex-col shadow-lg">
+                    <textarea
+                        placeholder="Décris ce dont tu as besoin d'aide..."
+                        class="w-full bg-transparent border-none focus:ring-0 resize-none text-[#F5F5F5] placeholder:text-[#555] text-lg min-h-[60px] outline-none"
+                        onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); startChat(); }"
+                    ></textarea>
+
+                    <div class="mt-auto flex items-center justify-between pt-4">
+                        <div class="flex items-center gap-2">
+                            <button class="h-9 w-9 rounded-full text-[#A0A0A0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                </svg>
+                            </button>
+
+                            <button class="h-9 w-9 rounded-full text-[#0066FF] hover:bg-[#2A2A2A] relative border border-[#333]/50">
+                                <svg class="w-4 h-4 fill-current" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </button>
+
+                            <div class="flex items-center gap-1 bg-[#222] rounded-full px-3 py-1.5 border border-[#333] cursor-pointer hover:bg-[#2A2A2A] transition-colors">
+                                <svg class="w-3.5 h-3.5 text-[#F5F5F5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="9" x2="15" y2="9"></line>
+                                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                                    <line x1="9" y1="15" x2="13" y2="15"></line>
+                                </svg>
+                                <span class="text-xs font-medium">Slides</span>
+                                <svg class="w-3 h-3 text-[#A0A0A0] ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button class="h-9 w-9 rounded-full text-[#A0A0A0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                </svg>
+                            </button>
+                            <button
+                                onclick="startChat()"
+                                class="h-9 w-9 rounded-xl bg-[#2A2A2A] hover:bg-[#333] text-[#F5F5F5] border border-[#333]"
+                            >
+                                <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Type Selector -->
+            <div class="w-full max-w-3xl flex items-center gap-2 mb-12 overflow-x-auto pb-2 scrollbar-hide">
+                <button onclick="setActiveTool('slides')" class="tool-type-button active">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="9"></line>
+                        <line x1="9" y1="12" x2="15" y2="12"></line>
+                        <line x1="9" y1="15" x2="13" y2="15"></line>
+                    </svg>
+                    <span>Slides</span>
+                </button>
+                <button onclick="setActiveTool('data')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        <circle cx="7" cy="12" r="1"></circle>
+                        <circle cx="12" cy="8" r="1"></circle>
+                        <circle cx="17" cy="14" r="1"></circle>
+                    </svg>
+                    <span>Data</span>
+                </button>
+                <button onclick="setActiveTool('docs')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10,9 9,9 8,9"></polyline>
+                    </svg>
+                    <span>Docs</span>
+                </button>
+                <button onclick="setActiveTool('canvas')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                        <rect x="3" y="3" width="4" height="4"></rect>
+                        <circle cx="17" cy="17" r="3"></circle>
+                    </svg>
+                    <span>Canvas</span>
+                </button>
+                <button onclick="setActiveTool('video')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        <circle cx="9" cy="9" r="2"></circle>
+                    </svg>
+                    <span>Video</span>
+                </button>
+                <button onclick="setActiveTool('research')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="M21 21l-4.35-4.35"></path>
+                        <circle cx="11" cy="11" r="3"></circle>
+                    </svg>
+                    <span>Research</span>
+                </button>
+                <button onclick="setActiveTool('image')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="9" cy="9" r="2"></circle>
+                        <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21"></path>
+                    </svg>
+                    <span>Image</span>
+                </button>
+            </div>
+
+            <!-- Template Gallery -->
+            <div class="w-full max-w-4xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm text-[#555] font-medium">Exemples de prompts</h3>
+                    <button class="h-6 w-6 text-[#555] hover:text-[#A0A0A0]">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="group cursor-pointer" onclick="startChat()">
+                        <div class="h-32 rounded-xl overflow-hidden mb-3 border border-[#2A2A2A] relative transition-transform group-hover:-translate-y-1 group-hover:shadow-lg bg-[#1A1A1A]">
+                            <div class="h-full w-full relative">
+                                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=300&q=80" alt="" class="w-full h-full object-cover opacity-60" />
+                                <div class="absolute inset-0 flex items-end p-4">
+                                    <span class="text-white font-bold text-xl">Minim</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-[#A0A0A0] group-hover:text-[#F5F5F5] transition-colors">Développer un deck de vente</div>
+                    </div>
+
+                    <div class="group cursor-pointer" onclick="startChat()">
+                        <div class="h-32 rounded-xl overflow-hidden mb-3 border border-[#2A2A2A] relative transition-transform group-hover:-translate-y-1 group-hover:shadow-lg bg-white text-black p-4 flex items-center">
+                            <h3 class="text-2xl font-bold leading-tight">Welcome to this presentation!</h3>
+                        </div>
+                        <div class="text-xs text-[#A0A0A0] group-hover:text-[#F5F5F5] transition-colors">Concevoir une présentation</div>
+                    </div>
+
+                    <div class="group cursor-pointer" onclick="startChat()">
+                        <div class="h-32 rounded-xl overflow-hidden mb-3 border border-[#2A2A2A] relative transition-transform group-hover:-translate-y-1 group-hover:shadow-lg bg-[#1A1A1A] p-4 flex flex-col justify-between">
+                            <div class="flex justify-between items-start">
+                                <div class="px-2 py-0.5 rounded text-xs font-bold bg-[#00D9B4] text-black">721M</div>
+                                <div class="text-[10px] text-gray-400">Overview of Key<br/>Yearly Achievements</div>
+                            </div>
+                            <div class="flex items-end gap-2 mt-auto">
+                                <span class="text-xs bg-gray-800 text-white px-1 rounded">4,876</span>
+                                <span class="text-2xl text-white font-mono">721M</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-[#A0A0A0] group-hover:text-[#F5F5F5] transition-colors">Construire une revue</div>
+                    </div>
+
+                    <div class="group cursor-pointer" onclick="startChat()">
+                        <div class="h-32 rounded-xl overflow-hidden mb-3 border border-[#2A2A2A] relative transition-transform group-hover:-translate-y-1 group-hover:shadow-lg bg-[#F5F5F5] text-black p-4">
+                            <div class="flex flex-col h-full">
+                                <div class="text-xs font-bold uppercase mb-1">Number Data</div>
+                                <div class="text-[10px] text-gray-500">Visualization</div>
+                                <div class="mt-auto self-end text-6xl font-light">%</div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-[#A0A0A0] group-hover:text-[#F5F5F5] transition-colors">Créer une mise à jour</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Advanced Tools Row -->
+        <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-full px-4 py-3">
+            <button onclick="openIntegrations()" class="advanced-tool-btn" title="Connect external services">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 12l2 2 4-4"/>
+                    <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"/>
+                    <path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/>
+                    <circle cx="7.5" cy="16.5" r="1.5"/>
+                    <circle cx="16.5" cy="16.5" r="1.5"/>
+                </svg>
+                <span class="text-xs mt-1">Integrations</span>
+            </button>
+            <button onclick="openLibrary()" class="advanced-tool-btn" title="Access AI tools library">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 003 8.5c0 2.29 1.51 4.04 3 5.5l6 6Z"/>
+                </svg>
+                <span class="text-xs mt-1">Library</span>
+            </button>
+            <button onclick="openTriggers()" class="advanced-tool-btn" title="Set up automated triggers">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                    <path d="M12 2v2"/>
+                    <path d="M12 20v2"/>
+                    <path d="M4.93 4.93l1.41 1.41"/>
+                    <path d="M17.66 17.66l1.41 1.41"/>
+                    <path d="M2 12h2"/>
+                    <path d="M20 12h2"/>
+                    <path d="M6.34 6.34L4.93 4.93"/>
+                    <path d="M19.07 19.07l-1.41-1.41"/>
+                </svg>
+                <span class="text-xs mt-1">Triggers</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div id="messages" class="fixed bottom-4 right-4 z-50"></div>
+
+    <script>
+        // Global variables
+        let selectedTool = 'slides';
+        let isSubmitted = false;
+
+        // Tool type buttons
+        const toolTypeButtons = document.querySelectorAll('.tool-type-button');
+        toolTypeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                toolTypeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                selectedTool = this.textContent.trim().toLowerCase();
+                showMessage(`🛠️ ${selectedTool.charAt(0).toUpperCase() + selectedTool.slice(1)} tool selected!`, 'info');
+            });
+        });
+
+        // Advanced tool buttons
+        document.querySelectorAll('.advanced-tool-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        function setActiveTool(tool) {
+            selectedTool = tool;
+            const buttons = document.querySelectorAll('.tool-type-button');
+            buttons.forEach(btn => {
+                if (btn.textContent.trim().toLowerCase() === tool) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            showMessage(`🛠️ ${tool.charAt(0).toUpperCase() + tool.slice(1)} tool selected!`, 'info');
+        }
+
+        function startChat() {
+            const textarea = document.querySelector('textarea');
+            const text = textarea.value.trim();
+
+            if (!text) {
+                showMessage('❌ Please enter a prompt first!', 'error');
+                return;
+            }
+
+            if (isSubmitted) return;
+
+            isSubmitted = true;
+            showMessage('🚀 Starting AI conversation...', 'info');
+
+            // Simulate AI response
+            setTimeout(() => {
+                showMessage('✅ AI response generated successfully!', 'success');
+                isSubmitted = false;
+            }, 2000);
+        }
+
+        function openIntegrations() {
+            showAdvancedPanel('integrations');
+        }
+
+        function openLibrary() {
+            showAdvancedPanel('library');
+        }
+
+        function openTriggers() {
+            showAdvancedPanel('triggers');
+        }
+
+        function showAdvancedPanel(type) {
+            // Close existing panels
+            closeAllAdvancedPanels();
+
+            // Create and show the panel
+            const panel = createAdvancedPanel(type);
+            document.body.appendChild(panel);
+
+            // Animate in
+            setTimeout(() => panel.classList.add('visible'), 10);
+        }
+
+        function closeAllAdvancedPanels() {
+            const panels = document.querySelectorAll('.advanced-panel');
+            panels.forEach(panel => {
+                panel.classList.remove('visible');
+                setTimeout(() => panel.remove(), 300);
+            });
+        }
+
+        function createAdvancedPanel(type) {
+            const panel = document.createElement('div');
+            panel.className = 'advanced-panel';
+            panel.innerHTML = getAdvancedPanelContent(type);
+
+            // Close on outside click
+            panel.addEventListener('click', (e) => {
+                if (e.target === panel) {
+                    closeAllAdvancedPanels();
+                }
+            });
+
+            return panel;
+        }
+
+        function getAdvancedPanelContent(type) {
+            const panels = {
+                integrations: `
+                    <div class="panel-overlay">
+                        <div class="panel-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold">🔗 External Integrations</h3>
+                                <button onclick="closeAllAdvancedPanels()" class="close-panel-btn">✕</button>
+                            </div>
+                            <div class="integrations-grid">
+                                <div class="integration-item" onclick="connectService('Google Drive')">
+                                    <div class="text-4xl mb-4">📁</div>
+                                    <h4 class="text-lg font-semibold mb-2">Google Drive</h4>
+                                    <p class="text-sm text-gray-400 mb-4">Access and manage files</p>
+                                    <button class="connect-btn">Connect</button>
+                                </div>
+                                <div class="integration-item" onclick="connectService('Google Docs')">
+                                    <div class="text-4xl mb-4">📄</div>
+                                    <h4 class="text-lg font-semibold mb-2">Google Docs</h4>
+                                    <p class="text-sm text-gray-400 mb-4">Create and edit documents</p>
+                                    <button class="connect-btn">Connect</button>
+                                </div>
+                                <div class="integration-item" onclick="connectService('Slack')">
+                                    <div class="text-4xl mb-4">💬</div>
+                                    <h4 class="text-lg font-semibold mb-2">Slack</h4>
+                                    <p class="text-sm text-gray-400 mb-4">Team communication</p>
+                                    <button class="connect-btn">Connect</button>
+                                </div>
+                                <div class="integration-item" onclick="connectService('Notion')">
+                                    <div class="text-4xl mb-4">📝</div>
+                                    <h4 class="text-lg font-semibold mb-2">Notion</h4>
+                                    <p class="text-sm text-gray-400 mb-4">Knowledge management</p>
+                                    <button class="connect-btn">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                library: `
+                    <div class="panel-overlay">
+                        <div class="panel-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold">📚 AI Tools Library</h3>
+                                <button onclick="closeAllAdvancedPanels()" class="close-panel-btn">✕</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex gap-2">
+                                    <button onclick="switchCategory('all')" class="px-4 py-2 rounded-lg bg-blue-600 text-white">All</button>
+                                    <button onclick="switchCategory('creative')" class="px-4 py-2 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600">Creative</button>
+                                    <button onclick="switchCategory('productivity')" class="px-4 py-2 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600">Productivity</button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div class="tool-item" onclick="addTool('Image Generator')">
+                                        <div class="text-3xl mb-3">🎨</div>
+                                        <h4 class="text-lg font-semibold mb-2">Image Generator</h4>
+                                        <p class="text-sm text-gray-400 mb-3">Create AI images from text</p>
+                                        <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">Add to Prompt</button>
+                                    </div>
+                                    <div class="tool-item" onclick="addTool('Code Review')">
+                                        <div class="text-3xl mb-3">💻</div>
+                                        <h4 class="text-lg font-semibold mb-2">Code Review</h4>
+                                        <p class="text-sm text-gray-400 mb-3">AI-powered code analysis</p>
+                                        <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">Add to Prompt</button>
+                                    </div>
+                                    <div class="tool-item" onclick="addTool('Translator')">
+                                        <div class="text-3xl mb-3">🌍</div>
+                                        <h4 class="text-lg font-semibold mb-2">Translator</h4>
+                                        <p class="text-sm text-gray-400 mb-3">Multi-language translation</p>
+                                        <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">Add to Prompt</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                triggers: `
+                    <div class="panel-overlay">
+                        <div class="panel-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold">⏰ Automated Triggers</h3>
+                                <button onclick="closeAllAdvancedPanels()" class="close-panel-btn">✕</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-4">Create New Trigger</h4>
+                                    <div class="space-y-3">
+                                        <button onclick="createTrigger('time')" class="w-full p-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-left">
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-2xl">🕐</div>
+                                                <div>
+                                                    <div class="font-semibold">Time-based</div>
+                                                    <div class="text-sm text-gray-400">Schedule tasks by time</div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                        <button onclick="createTrigger('event')" class="w-full p-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-left">
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-2xl">📧</div>
+                                                <div>
+                                                    <div class="font-semibold">Event-based</div>
+                                                    <div class="text-sm text-gray-400">React to events</div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                        <button onclick="createTrigger('webhook')" class="w-full p-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-left">
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-2xl">🌐</div>
+                                                <div>
+                                                    <div class="font-semibold">Webhook</div>
+                                                    <div class="text-sm text-gray-400">HTTP API triggers</div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-4">Active Triggers</h4>
+                                    <div class="text-center text-gray-400 py-8">
+                                        No active triggers yet.<br/>Create one above!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+
+            return panels[type] || '<div class="panel-content"><h3>Feature Coming Soon</h3><p>This feature is being developed.</p></div>';
+        }
+
+        function connectService(service) {
+            showMessage(`🔗 Connecting to ${service}...`, 'info');
+            setTimeout(() => {
+                showMessage(`✅ ${service} connected successfully!`, 'success');
+                closeAllAdvancedPanels();
+            }, 2000);
+        }
+
+        function switchCategory(category) {
+            showMessage(`📚 Switched to ${category} category`, 'info');
+        }
+
+        function addTool(tool) {
+            showMessage(`➕ Added ${tool} to your prompt!`, 'success');
+            closeAllAdvancedPanels();
+        }
+
+        function createTrigger(type) {
+            const triggerNames = {
+                'time': 'Time-based',
+                'event': 'Event-based',
+                'webhook': 'Webhook'
+            };
+            showMessage(`⏰ Created ${triggerNames[type]} trigger!`, 'success');
+            closeAllAdvancedPanels();
+        }
+
+        function showMessage(text, type = 'info') {
+            const messages = document.getElementById('messages');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+
+            messages.appendChild(message);
+
+            setTimeout(() => {
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showMessage('🎨 Welcome to Kortix AI Interface!', 'success');
+        });
+    </script>
+
+    <!-- Advanced Panel Styles -->
+    <style>
+        .advanced-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .advanced-panel.visible {
+            opacity: 1;
+        }
+        .panel-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        .panel-content {
+            padding: 2rem;
+            color: #ffffff;
+        }
+        .close-panel-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+        .close-panel-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        .integrations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .integration-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .integration-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .connect-btn {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .connect-btn:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+        .tool-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .tool-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInFromRight 0.3s ease-out;
+        }
+        .message.success { background: rgba(16, 185, 129, 0.9); }
+        .message.error { background: rgba(239, 68, 68, 0.9); }
+        .message.info { background: rgba(59, 130, 246, 0.9); }
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .tool-type-button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #A0A0A0;
+            cursor: pointer;
+        }
+        .tool-type-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #F5F5F5;
+        }
+        .tool-type-button.active {
+            background: #F5F5F5;
+            color: #0D0D0D;
+            border-color: #F5F5F5;
+        }
+        .advanced-tool-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: #A0A0A0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .advanced-tool-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #F5F5F5;
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <div class="min-h-screen bg-[#0D0D0D] text-[#F5F5F5] font-sans overflow-hidden">
+        <!-- Top Navigation -->
+        <header class="h-14 border-b border-transparent flex items-center justify-between px-6 shrink-0">
+            <div class="flex items-center gap-2 cursor-pointer hover:bg-[#1A1A1A] px-2 py-1 rounded-md transition-colors">
+                <span class="font-bold text-lg">AURION CHAT</span>
+                <svg class="w-4 h-4 text-[#A0A0A0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col items-center justify-center p-8 max-w-5xl mx-auto w-full overflow-y-auto scrollbar-hide">
+
+            <!-- Hero Section -->
+            <h1 class="text-4xl font-bold mb-8 text-center tracking-tight">
+                Qu'est-ce que tu veux accomplir ?
+            </h1>
+
+            <!-- Upgrade Banner -->
+            <div class="w-full max-w-3xl bg-[#151515] border border-[#2A2A2A] rounded-xl p-4 mb-6 flex items-center justify-between relative">
+                <div class="flex items-center gap-3">
+                    <div class="bg-[#2A2A2A] text-[#A0A0A0] px-2 py-0.5 text-xs font-normal rounded">⌘ Plus</div>
+                    <div>
+                        <div class="font-medium text-sm">Unlock the full Kortix experience</div>
+                        <div class="text-xs text-[#A0A0A0]">Kortix Advanced mode, 100+ Integrations, Triggers, Custom AI Workers & more</div>
+                    </div>
+                </div>
+                <button class="h-6 w-6 text-[#A0A0A0] hover:text-[#F5F5F5]">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Main Input Area -->
+            <div class="w-full max-w-3xl relative mb-6">
+                <div class="bg-[#151515] border border-[#2A2A2A] rounded-2xl p-4 min-h-[140px] flex flex-col shadow-lg">
+                    <textarea
+                        placeholder="Décris ce dont tu as besoin d'aide..."
+                        class="w-full bg-transparent border-none focus:ring-0 resize-none text-[#F5F5F5] placeholder:text-[#555] text-lg min-h-[60px] outline-none"
+                        onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); startChat(); }"
+                    ></textarea>
+
+                    <div class="mt-auto flex items-center justify-between pt-4">
+                        <div class="flex items-center gap-2">
+                            <button class="h-9 w-9 rounded-full text-[#A0A0A0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                </svg>
+                            </button>
+
+                            <button class="h-9 w-9 rounded-full text-[#0066FF] hover:bg-[#2A2A2A] relative border border-[#333]/50">
+                                <svg class="w-4 h-4 fill-current" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </button>
+
+                            <div class="flex items-center gap-1 bg-[#222] rounded-full px-3 py-1.5 border border-[#333] cursor-pointer hover:bg-[#2A2A2A] transition-colors">
+                                <svg class="w-3.5 h-3.5 text-[#F5F5F5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="9" x2="15" y2="9"></line>
+                                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                                    <line x1="9" y1="15" x2="13" y2="15"></line>
+                                </svg>
+                                <span class="text-xs font-medium">Slides</span>
+                                <svg class="w-3 h-3 text-[#A0A0A0] ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button class="h-9 w-9 rounded-full text-[#A0A0A0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                </svg>
+                            </button>
+                            <button
+                                onclick="startChat()"
+                                class="h-9 w-9 rounded-xl bg-[#2A2A2A] hover:bg-[#333] text-[#F5F5F5] border border-[#333]"
+                            >
+                                <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Type Selector -->
+            <div class="w-full max-w-3xl flex items-center gap-2 mb-12 overflow-x-auto pb-2 scrollbar-hide">
+                <button onclick="setActiveTool('slides')" class="tool-type-button active">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="9"></line>
+                        <line x1="9" y1="12" x2="15" y2="12"></line>
+                        <line x1="9" y1="15" x2="13" y2="15"></line>
+                    </svg>
+                    <span>Slides</span>
+                </button>
+                <button onclick="setActiveTool('data')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        <circle cx="7" cy="12" r="1"></circle>
+                        <circle cx="12" cy="8" r="1"></circle>
+                        <circle cx="17" cy="14" r="1"></circle>
+                    </svg>
+                    <span>Data</span>
+                </button>
+                <button onclick="setActiveTool('docs')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10,9 9,9 8,9"></polyline>
+                    </svg>
+                    <span>Docs</span>
+                </button>
+                <button onclick="setActiveTool('canvas')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                        <rect x="3" y="3" width="4" height="4"></rect>
+                        <circle cx="17" cy="17" r="3"></circle>
+                    </svg>
+                    <span>Canvas</span>
+                </button>
+                <button onclick="setActiveTool('video')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        <circle cx="9" cy="9" r="2"></circle>
+                    </svg>
+                    <span>Video</span>
+                </button>
+                <button onclick="setActiveTool('research')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="M21 21l-4.35-4.35"></path>
+                        <circle cx="11" cy="11" r="3"></circle>
+                    </svg>
+                    <span>Research</span>
+                </button>
+                <button onclick="setActiveTool('image')" class="tool-type-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="9" cy="9" r="2"></circle>
+                        <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21"></path>
+                    </svg>
+                    <span>Image</span>
+                </button>
+            </div>
+
+            <!-- Template Gallery -->
+            <div class="w-full max-w-4xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm text-[#555] font-medium">Exemples de prompts</h3>
+                    <button class="h-6 w-6 text-[#555] hover:text-[#A0A0A0]">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="group cursor-pointer" onclick="startChat()">
+                        <div class="h-32 rounded-xl overflow-hidden mb-3 border border-[#2A2A2A] relative transition-transform group-hover:-translate-y-1 group-hover:shadow-lg bg-[#1A1A1A]">
+                            <div class="h-full w-full relative">
+                                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=300&q=80" alt="" class="w-full h-full object-cover opacity-60" />
+                                <div class="absolute inset-0 flex items-end p-4">
+                                    <span class="text-white font-bold text-xl">Minim</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-[#A0A0A0] group-hover:text-[#F5F5F5] transition-colors">Développer un deck de vente</div>
+                    </div>
+
+                    <div class="group cursor-pointer" onclick="startChat()">
+                        <div class="h-32 rounded-xl overflow-hidden mb-3 border border-[#2A2A2A] relative transition-transform group-hover:-translate-y-1 group-hover:shadow-lg bg-white text-black p-4 flex items-center">
+                            <h3 class="text-2xl font-bold leading-tight">Welcome to this presentation!</h3>
+                        </div>
+                        <div class="text-xs text-[#A0A0A0] group-hover:text-[#F5F5F5] transition-colors">Concevoir une présentation</div>
+                    </div>
+
+                    <div class="group cursor-pointer" onclick="startChat()">
+                        <div class="h-32 rounded-xl overflow-hidden mb-3 border border-[#2A2A2A] relative transition-transform group-hover:-translate-y-1 group-hover:shadow-lg bg-[#1A1A1A] p-4 flex flex-col justify-between">
+                            <div class="flex justify-between items-start">
+                                <div class="px-2 py-0.5 rounded text-xs font-bold bg-[#00D9B4] text-black">721M</div>
+                                <div class="text-[10px] text-gray-400">Overview of Key<br/>Yearly Achievements</div>
+                            </div>
+                            <div class="flex items-end gap-2 mt-auto">
+                                <span class="text-xs bg-gray-800 text-white px-1 rounded">4,876</span>
+                                <span class="text-2xl text-white font-mono">721M</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-[#A0A0A0] group-hover:text-[#F5F5F5] transition-colors">Construire une revue</div>
+                    </div>
+
+                    <div class="group cursor-pointer" onclick="startChat()">
+                        <div class="h-32 rounded-xl overflow-hidden mb-3 border border-[#2A2A2A] relative transition-transform group-hover:-translate-y-1 group-hover:shadow-lg bg-[#F5F5F5] text-black p-4">
+                            <div class="flex flex-col h-full">
+                                <div class="text-xs font-bold uppercase mb-1">Number Data</div>
+                                <div class="text-[10px] text-gray-500">Visualization</div>
+                                <div class="mt-auto self-end text-6xl font-light">%</div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-[#A0A0A0] group-hover:text-[#F5F5F5] transition-colors">Créer une mise à jour</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Advanced Tools Row -->
+        <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-full px-4 py-3">
+            <button onclick="openIntegrations()" class="advanced-tool-btn" title="Connect external services">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 12l2 2 4-4"/>
+                    <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"/>
+                    <path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/>
+                    <circle cx="7.5" cy="16.5" r="1.5"/>
+                    <circle cx="16.5" cy="16.5" r="1.5"/>
+                </svg>
+                <span class="text-xs mt-1">Integrations</span>
+            </button>
+            <button onclick="openLibrary()" class="advanced-tool-btn" title="Access AI tools library">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 003 8.5c0 2.29 1.51 4.04 3 5.5l6 6Z"/>
+                </svg>
+                <span class="text-xs mt-1">Library</span>
+            </button>
+            <button onclick="openTriggers()" class="advanced-tool-btn" title="Set up automated triggers">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                    <path d="M12 2v2"/>
+                    <path d="M12 20v2"/>
+                    <path d="M4.93 4.93l1.41 1.41"/>
+                    <path d="M17.66 17.66l1.41 1.41"/>
+                    <path d="M2 12h2"/>
+                    <path d="M20 12h2"/>
+                    <path d="M6.34 6.34L4.93 4.93"/>
+                    <path d="M19.07 19.07l-1.41-1.41"/>
+                </svg>
+                <span class="text-xs mt-1">Triggers</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div id="messages" class="fixed bottom-4 right-4 z-50"></div>
+
+    <script>
+        // Global variables
+        let selectedTool = 'slides';
+        let isSubmitted = false;
+
+        // Tool type buttons
+        const toolTypeButtons = document.querySelectorAll('.tool-type-button');
+        toolTypeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                toolTypeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                selectedTool = this.textContent.trim().toLowerCase();
+                showMessage(`🛠️ ${selectedTool.charAt(0).toUpperCase() + selectedTool.slice(1)} tool selected!`, 'info');
+            });
+        });
+
+        // Advanced tool buttons
+        document.querySelectorAll('.advanced-tool-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        function setActiveTool(tool) {
+            selectedTool = tool;
+            const buttons = document.querySelectorAll('.tool-type-button');
+            buttons.forEach(btn => {
+                if (btn.textContent.trim().toLowerCase() === tool) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            showMessage(`🛠️ ${tool.charAt(0).toUpperCase() + tool.slice(1)} tool selected!`, 'info');
+        }
+
+        function startChat() {
+            const textarea = document.querySelector('textarea');
+            const text = textarea.value.trim();
+
+            if (!text) {
+                showMessage('❌ Please enter a prompt first!', 'error');
+                return;
+            }
+
+            if (isSubmitted) return;
+
+            isSubmitted = true;
+            showMessage('🚀 Starting AI conversation...', 'info');
+
+            // Simulate AI response
+            setTimeout(() => {
+                showMessage('✅ AI response generated successfully!', 'success');
+                isSubmitted = false;
+            }, 2000);
+        }
+
+        function openIntegrations() {
+            showAdvancedPanel('integrations');
+        }
+
+        function openLibrary() {
+            showAdvancedPanel('library');
+        }
+
+        function openTriggers() {
+            showAdvancedPanel('triggers');
+        }
+
+        function showAdvancedPanel(type) {
+            // Close existing panels
+            closeAllAdvancedPanels();
+
+            // Create and show the panel
+            const panel = createAdvancedPanel(type);
+            document.body.appendChild(panel);
+
+            // Animate in
+            setTimeout(() => panel.classList.add('visible'), 10);
+        }
+
+        function closeAllAdvancedPanels() {
+            const panels = document.querySelectorAll('.advanced-panel');
+            panels.forEach(panel => {
+                panel.classList.remove('visible');
+                setTimeout(() => panel.remove(), 300);
+            });
+        }
+
+        function createAdvancedPanel(type) {
+            const panel = document.createElement('div');
+            panel.className = 'advanced-panel';
+            panel.innerHTML = getAdvancedPanelContent(type);
+
+            // Close on outside click
+            panel.addEventListener('click', (e) => {
+                if (e.target === panel) {
+                    closeAllAdvancedPanels();
+                }
+            });
+
+            return panel;
+        }
+
+        function getAdvancedPanelContent(type) {
+            const panels = {
+                integrations: `
+                    <div class="panel-overlay">
+                        <div class="panel-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold">🔗 External Integrations</h3>
+                                <button onclick="closeAllAdvancedPanels()" class="close-panel-btn">✕</button>
+                            </div>
+                            <div class="integrations-grid">
+                                <div class="integration-item" onclick="connectService('Google Drive')">
+                                    <div class="text-4xl mb-4">📁</div>
+                                    <h4 class="text-lg font-semibold mb-2">Google Drive</h4>
+                                    <p class="text-sm text-gray-400 mb-4">Access and manage files</p>
+                                    <button class="connect-btn">Connect</button>
+                                </div>
+                                <div class="integration-item" onclick="connectService('Google Docs')">
+                                    <div class="text-4xl mb-4">📄</div>
+                                    <h4 class="text-lg font-semibold mb-2">Google Docs</h4>
+                                    <p class="text-sm text-gray-400 mb-4">Create and edit documents</p>
+                                    <button class="connect-btn">Connect</button>
+                                </div>
+                                <div class="integration-item" onclick="connectService('Slack')">
+                                    <div class="text-4xl mb-4">💬</div>
+                                    <h4 class="text-lg font-semibold mb-2">Slack</h4>
+                                    <p class="text-sm text-gray-400 mb-4">Team communication</p>
+                                    <button class="connect-btn">Connect</button>
+                                </div>
+                                <div class="integration-item" onclick="connectService('Notion')">
+                                    <div class="text-4xl mb-4">📝</div>
+                                    <h4 class="text-lg font-semibold mb-2">Notion</h4>
+                                    <p class="text-sm text-gray-400 mb-4">Knowledge management</p>
+                                    <button class="connect-btn">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                library: `
+                    <div class="panel-overlay">
+                        <div class="panel-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold">📚 AI Tools Library</h3>
+                                <button onclick="closeAllAdvancedPanels()" class="close-panel-btn">✕</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex gap-2">
+                                    <button onclick="switchCategory('all')" class="px-4 py-2 rounded-lg bg-blue-600 text-white">All</button>
+                                    <button onclick="switchCategory('creative')" class="px-4 py-2 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600">Creative</button>
+                                    <button onclick="switchCategory('productivity')" class="px-4 py-2 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600">Productivity</button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div class="tool-item" onclick="addTool('Image Generator')">
+                                        <div class="text-3xl mb-3">🎨</div>
+                                        <h4 class="text-lg font-semibold mb-2">Image Generator</h4>
+                                        <p class="text-sm text-gray-400 mb-3">Create AI images from text</p>
+                                        <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">Add to Prompt</button>
+                                    </div>
+                                    <div class="tool-item" onclick="addTool('Code Review')">
+                                        <div class="text-3xl mb-3">💻</div>
+                                        <h4 class="text-lg font-semibold mb-2">Code Review</h4>
+                                        <p class="text-sm text-gray-400 mb-3">AI-powered code analysis</p>
+                                        <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">Add to Prompt</button>
+                                    </div>
+                                    <div class="tool-item" onclick="addTool('Translator')">
+                                        <div class="text-3xl mb-3">🌍</div>
+                                        <h4 class="text-lg font-semibold mb-2">Translator</h4>
+                                        <p class="text-sm text-gray-400 mb-3">Multi-language translation</p>
+                                        <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">Add to Prompt</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                triggers: `
+                    <div class="panel-overlay">
+                        <div class="panel-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold">⏰ Automated Triggers</h3>
+                                <button onclick="closeAllAdvancedPanels()" class="close-panel-btn">✕</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-4">Create New Trigger</h4>
+                                    <div class="space-y-3">
+                                        <button onclick="createTrigger('time')" class="w-full p-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-left">
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-2xl">🕐</div>
+                                                <div>
+                                                    <div class="font-semibold">Time-based</div>
+                                                    <div class="text-sm text-gray-400">Schedule tasks by time</div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                        <button onclick="createTrigger('event')" class="w-full p-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-left">
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-2xl">📧</div>
+                                                <div>
+                                                    <div class="font-semibold">Event-based</div>
+                                                    <div class="text-sm text-gray-400">React to events</div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                        <button onclick="createTrigger('webhook')" class="w-full p-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-left">
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-2xl">🌐</div>
+                                                <div>
+                                                    <div class="font-semibold">Webhook</div>
+                                                    <div class="text-sm text-gray-400">HTTP API triggers</div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-4">Active Triggers</h4>
+                                    <div class="text-center text-gray-400 py-8">
+                                        No active triggers yet.<br/>Create one above!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+
+            return panels[type] || '<div class="panel-content"><h3>Feature Coming Soon</h3><p>This feature is being developed.</p></div>';
+        }
+
+        function connectService(service) {
+            showMessage(`🔗 Connecting to ${service}...`, 'info');
+            setTimeout(() => {
+                showMessage(`✅ ${service} connected successfully!`, 'success');
+                closeAllAdvancedPanels();
+            }, 2000);
+        }
+
+        function switchCategory(category) {
+            showMessage(`📚 Switched to ${category} category`, 'info');
+        }
+
+        function addTool(tool) {
+            showMessage(`➕ Added ${tool} to your prompt!`, 'success');
+            closeAllAdvancedPanels();
+        }
+
+        function createTrigger(type) {
+            const triggerNames = {
+                'time': 'Time-based',
+                'event': 'Event-based',
+                'webhook': 'Webhook'
+            };
+            showMessage(`⏰ Created ${triggerNames[type]} trigger!`, 'success');
+            closeAllAdvancedPanels();
+        }
+
+        function showMessage(text, type = 'info') {
+            const messages = document.getElementById('messages');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+
+            messages.appendChild(message);
+
+            setTimeout(() => {
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showMessage('🎨 Welcome to Kortix AI Interface!', 'success');
+        });
+    </script>
+</body>
+</html>
