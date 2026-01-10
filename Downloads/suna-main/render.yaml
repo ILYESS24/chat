@@ -1,0 +1,15 @@
+services:
+  # AI Worker Interface - Simplified and Stable
+  - type: web
+    name: ai-worker-interface
+    env: python
+    rootDir: suna-main/backend/
+    buildCommand: pip install -r requirements.txt
+    startCommand: python simple_api.py
+    envVars:
+      - key: ENV_MODE
+        value: production
+    healthCheckPath: /
+    plan: starter
+
+# No databases needed for this simplified version
