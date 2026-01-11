@@ -3,6 +3,8 @@ fastapi==0.115.12
 uvicorn==0.27.1
 python-multipart==0.0.20
 
+# Additional deployment fix comment
+
 # Configuration and environment
 python-dotenv==1.0.1
 click==8.1.7
