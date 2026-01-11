@@ -290,8 +290,8 @@ if config.ENV_MODE == EnvMode.STAGING:
     allow_origin_regex = r"https://.*-kortixai\.vercel\.app"
 
 # Allow Cloudflare Pages deployments
-if config.ENV_MODE in [EnvMode.PRODUCTION, EnvMode.STAGING, EnvMode.DEVELOPMENT]:
-    allow_origin_regex = r"https://.*\.pages\.dev" if allow_origin_regex is None else f"{allow_origin_regex}|https://.*\.pages\.dev"
+if config.ENV_MODE in [EnvMode.PRODUCTION, EnvMode.STAGING]:
+    allow_origin_regex = r"https://.*\\.pages\\.dev" if allow_origin_regex is None else f"{allow_origin_regex}|https://.*\\.pages\\.dev"
 
 app.add_middleware(
     CORSMiddleware,
