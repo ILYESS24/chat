@@ -1,43 +1,49 @@
-from daytona_sdk import AsyncDaytona, DaytonaConfig, CreateSandboxFromSnapshotParams, AsyncSandbox, SessionExecuteRequest, Resources, SandboxState
 from dotenv import load_dotenv
 from core.utils.logger import logger
 from core.utils.config import config
-from core.utils.config import Configuration
 import asyncio
 
 load_dotenv()
 
-# logger.debug("Initializing Daytona sandbox configuration")
-daytona_config = DaytonaConfig(
-    api_key=config.DAYTONA_API_KEY,
-    api_url=config.DAYTONA_SERVER_URL, 
-    target=config.DAYTONA_TARGET,
-)
+# Daytona est optionnel - ne l'importons et initialisons que si configuré
+daytona = None
+daytona_available = False
 
-if daytona_config.api_key:
-    logger.debug("Daytona sandbox configured successfully")
-else:
-    logger.warning("No Daytona API key found in environment variables")
+try:
+    if config.DAYTONA_API_KEY and config.DAYTONA_SERVER_URL:
+        from daytona_sdk import AsyncDaytona, DaytonaConfig, CreateSandboxFromSnapshotParams, AsyncSandbox, SessionExecuteRequest, Resources, SandboxState
 
-if daytona_config.api_url:
-    logger.debug(f"Daytona API URL set to: {daytona_config.api_url}")
-else:
-    logger.warning("No Daytona API URL found in environment variables")
+        daytona_config = DaytonaConfig(
+            api_key=config.DAYTONA_API_KEY,
+            api_url=config.DAYTONA_SERVER_URL,
+            target=config.DAYTONA_TARGET,
+        )
 
-if daytona_config.target:
-    logger.debug(f"Daytona target set to: {daytona_config.target}")
-else:
-    logger.warning("No Daytona target found in environment variables")
+        daytona = AsyncDaytona(daytona_config)
+        daytona_available = True
+        logger.info("Daytona sandbox configured successfully")
+    else:
+        logger.info("Daytona not configured - sandbox features will be disabled")
 
-daytona = AsyncDaytona(daytona_config)
+except ImportError:
+    logger.warning("Daytona SDK not available - sandbox features will be disabled")
+except Exception as e:
+    logger.error(f"Failed to initialize Daytona: {e}")
+    logger.info("Sandbox features will be disabled")
 
 async def get_or_start_sandbox(sandbox_id: str) -> AsyncSandbox:
     """Retrieve a sandbox by ID, check its state, and start it if needed."""
-    
+
+    if not daytona_available or daytona is None:
+        raise RuntimeError("Daytona sandbox is not configured or available")
+
     logger.info(f"Getting or starting sandbox with ID: {sandbox_id}")
 
     try:
         sandbox = await daytona.get(sandbox_id)
+    except Exception as e:
+        logger.error(f"Failed to get sandbox {sandbox_id}: {e}")
+        raise
         
         # Check if sandbox needs to be started
         if sandbox.state in [SandboxState.ARCHIVED, SandboxState.STOPPED, SandboxState.ARCHIVING]:
@@ -81,7 +87,10 @@ async def start_supervisord_session(sandbox: AsyncSandbox):
 
 async def create_sandbox(password: str, project_id: str = None) -> AsyncSandbox:
     """Create a new sandbox with all required services configured and running."""
-    
+
+    if not daytona_available or daytona is None:
+        raise RuntimeError("Daytona sandbox is not configured or available")
+
     logger.info("Creating new Daytona sandbox environment")
     # logger.debug("Configuring sandbox with snapshot and environment variables")
     
@@ -128,6 +137,11 @@ async def create_sandbox(password: str, project_id: str = None) -> AsyncSandbox:
 
 async def delete_sandbox(sandbox_id: str) -> bool:
     """Delete a sandbox by its ID."""
+
+    if not daytona_available or daytona is None:
+        logger.warning("Daytona not available - cannot delete sandbox")
+        return False
+
     logger.info(f"Deleting sandbox with ID: {sandbox_id}")
 
     try:

@@ -6,8 +6,16 @@ from core.agentpress.tool import Tool
 
 if TYPE_CHECKING:
     from core.agentpress.thread_manager import ThreadManager
-from daytona_sdk import AsyncSandbox
-from core.sandbox.sandbox import get_or_start_sandbox, create_sandbox, delete_sandbox
+try:
+    from daytona_sdk import AsyncSandbox
+    from core.sandbox.sandbox import get_or_start_sandbox, create_sandbox, delete_sandbox
+    DAYTONA_AVAILABLE = True
+except ImportError:
+    AsyncSandbox = None
+    get_or_start_sandbox = None
+    create_sandbox = None
+    delete_sandbox = None
+    DAYTONA_AVAILABLE = False
 from core.utils.logger import logger
 from core.utils.files_utils import clean_path
 from core.utils.config import config
@@ -68,6 +76,9 @@ class SandboxToolsBase(Tool):
 
                 # If there is no sandbox resource for this project, create one lazily
                 if not sandbox_resource or sandbox_resource.get('status') != ResourceStatus.ACTIVE.value:
+                    if not DAYTONA_AVAILABLE:
+                        raise RuntimeError("Sandbox functionality requires Daytona configuration")
+
                     logger.debug(f"No active sandbox resource for project {self.project_id}; creating lazily")
                     sandbox_pass = str(uuid.uuid4())
                     sandbox_obj = await create_sandbox(sandbox_pass, self.project_id)
@@ -112,7 +123,8 @@ class SandboxToolsBase(Tool):
                         if not await resource_service.link_resource_to_project(self.project_id, resource_id):
                             # Cleanup created sandbox if DB update failed
                             try:
-                                await delete_sandbox(sandbox_id)
+                                if DAYTONA_AVAILABLE:
+                                    await delete_sandbox(sandbox_id)
                                 await resource_service.delete_resource(resource_id)
                             except Exception:
                                 logger.error(f"Failed to cleanup sandbox {sandbox_id} after DB update failure", exc_info=True)
@@ -120,7 +132,8 @@ class SandboxToolsBase(Tool):
                     except Exception as e:
                         # Cleanup created sandbox if resource creation failed
                         try:
-                            await delete_sandbox(sandbox_id)
+                            if DAYTONA_AVAILABLE:
+                                await delete_sandbox(sandbox_id)
                         except Exception:
                             logger.error(f"Failed to delete sandbox {sandbox_id} after resource creation failure", exc_info=True)
                         raise Exception(f"Failed to create sandbox resource: {str(e)}")
@@ -144,7 +157,10 @@ class SandboxToolsBase(Tool):
                     self._sandbox_id = sandbox_id
                     self._sandbox_pass = sandbox_pass
                     self._sandbox_url = website_url
-                    self._sandbox = await get_or_start_sandbox(self._sandbox_id)
+                    if DAYTONA_AVAILABLE:
+                        self._sandbox = await get_or_start_sandbox(self._sandbox_id)
+                    else:
+                        self._sandbox = None
                     
                     # Update last_used_at timestamp
                     try:
@@ -157,7 +173,10 @@ class SandboxToolsBase(Tool):
                     self._sandbox_id = sandbox_resource.get('external_id')
                     self._sandbox_pass = config.get('pass')
                     self._sandbox_url = config.get('sandbox_url')
-                    self._sandbox = await get_or_start_sandbox(self._sandbox_id)
+                    if DAYTONA_AVAILABLE:
+                        self._sandbox = await get_or_start_sandbox(self._sandbox_id)
+                    else:
+                        self._sandbox = None
                     
                     # Update last_used_at timestamp
                     try:
