@@ -1,7 +1,7 @@
 # 🔐 CLÉ DE CHIFFREMENT MCP POUR KORTIX
 # COPIEZ CETTE VALEUR DANS VOTRE CONFIGURATION RENDER
 
-MCP_CREDENTIAL_ENCRYPTION_KEY=eznwPaXp1EHaJImeIW+P+JfKVu0p6V5/Vmbb3mMSR20=
+MCP_CREDENTIAL_ENCRYPTION_KEY=5VbjomjZucBNVqphxQ8D9gD52Iy5nFzgo7z85hoL5t8=
 
 # =============================================================================
 # INSTRUCTIONS POUR CONFIGURER DANS RENDER
@@ -12,7 +12,7 @@ MCP_CREDENTIAL_ENCRYPTION_KEY=eznwPaXp1EHaJImeIW+P+JfKVu0p6V5/Vmbb3mMSR20=
 3. Onglet "Environment"
 4. Ajoutez une nouvelle variable :
    - Key: MCP_CREDENTIAL_ENCRYPTION_KEY
-   - Value: eznwPaXp1EHaJImeIW+P+JfKVu0p6V5/Vmbb3mMSR20=
+   - Value: 5VbjomjZucBNVqphxQ8D9gD52Iy5nFzgo7z85hoL5t8=
 5. Cliquez "Save"
 6. Redéployez
 
@@ -30,4 +30,4 @@ MCP_CREDENTIAL_ENCRYPTION_KEY=eznwPaXp1EHaJImeIW+P+JfKVu0p6V5/Vmbb3mMSR20=
 # SUPABASE_ANON_KEY=votre_clé_supabase
 # OPENAI_API_KEY=sk-votre_clé_openai
 # STRIPE_SECRET_KEY=sk_votre_clé_stripe
-# MCP_CREDENTIAL_ENCRYPTION_KEY=eznwPaXp1EHaJImeIW+P+JfKVu0p6V5/Vmbb3mMSR20=
+# MCP_CREDENTIAL_ENCRYPTION_KEY=5VbjomjZucBNVqphxQ8D9gD52Iy5nFzgo7z85hoL5t8=
