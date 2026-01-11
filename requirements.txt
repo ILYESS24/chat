@@ -1,0 +1,4 @@
+# Ce fichier requirements.txt pointe vers backend/requirements.txt
+# pour la compatibilité avec Render qui cherche requirements.txt à la racine
+
+-r backend/requirements.txt
