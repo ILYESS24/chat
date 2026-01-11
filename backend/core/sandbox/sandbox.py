@@ -178,8 +178,7 @@ async def delete_sandbox(sandbox_id: str) -> bool:
         logger.warning("Daytona not available - cannot delete sandbox")
         return False
 
-    try:
-        logger.info(f"Deleting sandbox with ID: {sandbox_id}")
+    logger.info(f"Deleting sandbox with ID: {sandbox_id}")
 
     try:
         # Get the sandbox
