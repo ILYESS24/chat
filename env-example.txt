@@ -1,0 +1,33 @@
+# Configuration pour le déploiement automatique sur Render
+# Copiez ce fichier vers .env et remplissez les valeurs
+
+# Clé API Render (obligatoire pour le déploiement automatique)
+# Obtenez-la sur https://dashboard.render.com/account/api-keys
+RENDER_API_KEY=your_render_api_key_here
+
+# Configuration Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Clé secrète Supabase (optionnel, seulement si vous utilisez les fonctionnalités admin)
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
+# Authentification
+JWT_SECRET=your_jwt_secret_key_here
+
+# APIs externes
+OPENAI_API_KEY=sk-your_openai_api_key
+STRIPE_SECRET_KEY=sk_test_or_live_your_stripe_secret_key
+TAVILY_API_KEY=your_tavily_api_key
+
+# Redis (optionnel, pour le cache)
+REDIS_URL=redis://your-redis-url
+
+# Analytics (optionnel)
+NEXT_PUBLIC_POSTHOG_KEY=your_posthog_key
+
+# Configuration Render (optionnel)
+RENDER_BRANCH=main
+RENDER_WORKSPACE_ID=your_workspace_id

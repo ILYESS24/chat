@@ -39,7 +39,7 @@ def _get_cloudwatch_client():
 async def get_worker_metrics() -> dict:
     """
     Get active agent run metrics.
-    
+
     Returns:
         dict with:
         - active_agent_runs: Total active runs across all instances (from DB)
@@ -48,18 +48,30 @@ async def get_worker_metrics() -> dict:
     """
     from core.services.supabase import DBConnection
     from core.services import redis
-    
+
     db = DBConnection()
-    
+
     try:
-        # Count active agent runs from database (source of truth across all instances)
-        client = await db.client
-        active_runs_result = await client.table('agent_runs')\
-            .select('id', count='exact')\
-            .eq('status', 'running')\
-            .execute()
-        active_agent_runs = active_runs_result.count or 0
-        
+        active_agent_runs = 0
+
+        try:
+            # Count active agent runs from database (source of truth across all instances)
+            client = await db.client
+            active_runs_result = await client.table('agent_runs')\
+                .select('id', count='exact')\
+                .eq('status', 'running')\
+                .execute()
+            active_agent_runs = active_runs_result.count or 0
+        except Exception as db_error:
+            # Handle case where agent_runs table doesn't exist yet (database not fully initialized)
+            error_msg = str(db_error)
+            if "agent_runs" in error_msg and ("not found" in error_msg.lower() or "does not exist" in error_msg.lower()):
+                logger.warning(f"Database table 'agent_runs' not found - database may not be fully initialized. Using default values.")
+                active_agent_runs = 0
+            else:
+                # Re-raise other database errors
+                raise db_error
+
         # Count active Redis stream keys (real-time tracking)
         active_redis_streams = 0
         try:
@@ -76,11 +88,11 @@ async def get_worker_metrics() -> dict:
             logger.warning(f"Failed to count Redis stream keys: {e}")
             # Fallback: use DB count if Redis fails
             active_redis_streams = active_agent_runs
-        
+
         # Orphaned streams = Redis streams without corresponding 'running' DB record
         # Should be 0 in healthy state - non-zero indicates cleanup issues
         orphaned_streams = max(0, active_redis_streams - active_agent_runs)
-        
+
         return {
             "active_agent_runs": active_agent_runs,
             "active_redis_streams": active_redis_streams,
@@ -89,7 +101,14 @@ async def get_worker_metrics() -> dict:
         }
     except Exception as e:
         logger.error(f"Failed to get API instance metrics: {e}")
-        raise
+        # Return safe defaults instead of crashing
+        return {
+            "active_agent_runs": 0,
+            "active_redis_streams": 0,
+            "orphaned_streams": 0,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "error": str(e)
+        }
 
 
 async def get_worker_count() -> int:

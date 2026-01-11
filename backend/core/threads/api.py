@@ -273,7 +273,16 @@ async def delete_project(
         if thread_ids:
             logger.debug(f"Deleting agent runs for {len(thread_ids)} threads")
             for thread_id in thread_ids:
-                await client.table('agent_runs').delete().eq('thread_id', thread_id).execute()
+                try:
+                    await client.table('agent_runs').delete().eq('thread_id', thread_id).execute()
+                except Exception as db_error:
+                    # Handle case where agent_runs table doesn't exist yet (database not fully initialized)
+                    error_msg = str(db_error)
+                    if "agent_runs" in error_msg and ("not found" in error_msg.lower() or "does not exist" in error_msg.lower()):
+                        logger.warning(f"Database table 'agent_runs' not found - skipping agent runs cleanup for thread {thread_id}")
+                    else:
+                        # Re-raise other database errors
+                        raise db_error
         
         if thread_ids:
             logger.debug(f"Deleting messages for {len(thread_ids)} threads")

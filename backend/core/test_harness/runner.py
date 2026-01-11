@@ -179,8 +179,18 @@ class TestHarnessRunner:
             # Delete agent_runs first (to avoid FK constraint violations), then threads
             for thread_id in thread_ids:
                 try:
-                    # Delete agent_runs first
-                    await client.table('agent_runs').delete().eq('thread_id', thread_id).execute()
+                    # Delete agent_runs first (if table exists)
+                    try:
+                        await client.table('agent_runs').delete().eq('thread_id', thread_id).execute()
+                    except Exception as db_error:
+                        # Handle case where agent_runs table doesn't exist yet (database not fully initialized)
+                        error_msg = str(db_error)
+                        if "agent_runs" in error_msg and ("not found" in error_msg.lower() or "does not exist" in error_msg.lower()):
+                            logger.debug(f"Database table 'agent_runs' not found - skipping agent runs cleanup for test thread {thread_id}")
+                        else:
+                            # Re-raise other database errors
+                            raise db_error
+
                     # Then delete the thread
                     await client.table('threads').delete().eq('thread_id', thread_id).execute()
                     logger.debug(f"Deleted test thread and its agent_runs: {thread_id}")

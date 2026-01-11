@@ -1,0 +1,79 @@
+# Configuration Render pour le déploiement automatisé
+# Ce fichier peut être utilisé avec render-deploy-action ou CLI
+
+services:
+  # Base de données PostgreSQL
+  - type: pgsql
+    name: kortix-db
+    plan: starter
+    region: oregon
+    # Les credentials seront générées automatiquement
+
+  # Service Backend FastAPI
+  - type: web
+    name: kortix-backend
+    runtime: python
+    plan: starter
+    region: oregon
+    repo: https://github.com/kortix-ai/suna
+    branch: main
+    buildCommand: |
+      pip install uv
+      uv sync --locked
+    startCommand: uv run gunicorn api:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 75 --graceful-timeout 30 --keep-alive 65
+    rootDir: backend
+    envVars:
+      - key: ENV_MODE
+        value: production
+      - key: PYTHONPATH
+        value: /app
+      - key: DATABASE_URL
+        fromService:
+          type: pgsql
+          name: kortix-db
+          property: connectionString
+      - key: SUPABASE_URL
+        value: ${SUPABASE_URL}
+      - key: SUPABASE_ANON_KEY
+        value: ${SUPABASE_ANON_KEY}
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+      - key: OPENAI_API_KEY
+        value: ${OPENAI_API_KEY}
+      - key: STRIPE_SECRET_KEY
+        value: ${STRIPE_SECRET_KEY}
+
+  # Service Frontend Next.js
+  - type: web
+    name: kortix-frontend
+    runtime: node
+    plan: starter
+    region: oregon
+    repo: https://github.com/kortix-ai/suna
+    branch: main
+    buildCommand: npm run build
+    startCommand: npm start
+    rootDir: apps/frontend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: kortix-backend
+          property: host
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: ${NEXT_PUBLIC_SUPABASE_URL}
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        value: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+
+# Variables d'environnement globales (à définir dans Render Dashboard)
+# SUPABASE_URL=https://your-project.supabase.co
+# SUPABASE_ANON_KEY=your-anon-key
+# JWT_SECRET=your-jwt-secret
+# OPENAI_API_KEY=sk-...
+# STRIPE_SECRET_KEY=sk_...
+# NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key

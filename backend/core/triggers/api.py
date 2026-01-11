@@ -496,14 +496,24 @@ async def get_trigger_executions(
         
         client = await db.client
 
-        runs_result = await client.table('agent_runs').select(
-            'id, thread_id, agent_id, status, created_at, completed_at, error, metadata'
-        ).eq(
-            'metadata->>trigger_id', trigger_id
-        ).order(
-            'created_at', desc=True
-        ).limit(limit).execute()
-        
+        try:
+            runs_result = await client.table('agent_runs').select(
+                'id, thread_id, agent_id, status, created_at, completed_at, error, metadata'
+            ).eq(
+                'metadata->>trigger_id', trigger_id
+            ).order(
+                'created_at', desc=True
+            ).limit(limit).execute()
+        except Exception as db_error:
+            # Handle case where agent_runs table doesn't exist yet (database not fully initialized)
+            error_msg = str(db_error)
+            if "agent_runs" in error_msg and ("not found" in error_msg.lower() or "does not exist" in error_msg.lower()):
+                logger.warning(f"Database table 'agent_runs' not found - database may not be fully initialized. Returning empty execution history.")
+                runs_result = type('MockResult', (), {'data': []})()
+            else:
+                # Re-raise other database errors
+                raise db_error
+
         executions = []
         for run in runs_result.data or []:
             executions.append(TriggerExecution(

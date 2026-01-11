@@ -44,11 +44,21 @@ async def cleanup_orphaned_agent_runs(db_client) -> int:
     
     try:
         # Get ALL "running" runs to filter by instance
-        stale_runs = await db_client.table('agent_runs')\
-            .select('id, thread_id, started_at, metadata')\
-            .eq('status', 'running')\
-            .execute()
-        
+        try:
+            stale_runs = await db_client.table('agent_runs')\
+                .select('id, thread_id, started_at, metadata')\
+                .eq('status', 'running')\
+                .execute()
+        except Exception as db_error:
+            # Handle case where agent_runs table doesn't exist yet (database not fully initialized)
+            error_msg = str(db_error)
+            if "agent_runs" in error_msg and ("not found" in error_msg.lower() or "does not exist" in error_msg.lower()):
+                logger.warning(f"Database table 'agent_runs' not found - database may not be fully initialized. Skipping orphan cleanup.")
+                return 0
+            else:
+                # Re-raise other database errors
+                raise db_error
+
         if not stale_runs.data:
             logger.info("✅ No orphaned agent runs found on startup")
             return 0
