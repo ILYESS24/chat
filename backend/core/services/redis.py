@@ -28,6 +28,7 @@ class RedisClient:
         self._client: Optional[Redis] = None
         self._init_lock: Optional[asyncio.Lock] = None
         self._initialized = False
+        self._redis_available = True  # Flag to track if Redis is available
         # Metrics for monitoring
         self._op_count = 0
         self._timeout_count = 0
@@ -76,28 +77,33 @@ class RedisClient:
             }
         return {"status": "pool_not_initialized"}
 
-    async def get_client(self) -> Redis:
-        if self._client is not None and self._initialized:
+    async def get_client(self) -> Optional[Redis]:
+        if self._client is not None and self._initialized and self._redis_available:
             return self._client
-        
+
+        # If Redis is marked as unavailable, return None
+        if not self._redis_available:
+            logger.debug("Redis is marked as unavailable, returning None")
+            return None
+
         # Lazily create the async lock (thread-safe via __init__)
         if self._init_lock is None:
             self._init_lock = asyncio.Lock()
-        
+
         async with self._init_lock:
             # Double-check after acquiring lock to prevent race condition
-            if self._client is not None and self._initialized:
+            if self._client is not None and self._initialized and self._redis_available:
                 return self._client
-            
+
             config = self._get_config()
-            
+
             logger.info(
                 f"Initializing Redis to {config['host']}:{config['port']} "
                 f"(socket_timeout={SOCKET_TIMEOUT}s, connect_timeout={SOCKET_CONNECT_TIMEOUT}s)"
             )
-            
+
             retry = Retry(ExponentialBackoff(), 3)
-            
+
             self._pool = ConnectionPool.from_url(
                 config["url"],
                 decode_responses=True,
@@ -112,20 +118,22 @@ class RedisClient:
                 retry=retry,
                 retry_on_error=[BusyLoadingError]
             )
-            
+
             try:
                 await asyncio.wait_for(self._client.ping(), timeout=5.0)
                 self._initialized = True
+                self._redis_available = True
                 self._init_time = time.time()
                 logger.info("Successfully connected to Redis")
+                return self._client
             except asyncio.TimeoutError:
-                logger.error("Redis ping timed out after 5 seconds")
-                raise ConnectionError("Redis connection timeout - is Redis running?")
+                logger.error("Redis ping timed out after 5 seconds - Redis will be disabled")
+                self._redis_available = False
+                return None
             except Exception as e:
-                logger.error(f"Redis ping failed: {e}")
-                raise ConnectionError(f"Redis connection failed: {e}")
-            
-            return self._client
+                logger.error(f"Redis ping failed: {e} - Redis will be disabled")
+                self._redis_available = False
+                return None
     
     async def initialize_async(self):
         await self.get_client()
@@ -207,10 +215,15 @@ class RedisClient:
     async def get(self, key: str, timeout: float = None) -> Optional[str]:
         """Get a key with timeout protection."""
         timeout = timeout or DEFAULT_OP_TIMEOUT
-        if self._initialized and self._client:
+        if self._initialized and self._client and self._redis_available:
             client = self._client
         else:
             client = await self.get_client()
+
+        if client is None:
+            logger.debug(f"Redis unavailable, cannot GET key '{key[:50]}...'")
+            return None
+
         return await self._with_timeout(
             client.get(key),
             timeout_seconds=timeout,
@@ -221,10 +234,15 @@ class RedisClient:
     async def set(self, key: str, value: str, ex: int = None, nx: bool = False, timeout: float = None) -> bool:
         """Set a key with timeout protection."""
         timeout = timeout or DEFAULT_OP_TIMEOUT
-        if self._initialized and self._client:
+        if self._initialized and self._client and self._redis_available:
             client = self._client
         else:
             client = await self.get_client()
+
+        if client is None:
+            logger.debug(f"Redis unavailable, cannot SET key '{key[:50]}...'")
+            return False
+
         result = await self._with_timeout(
             client.set(key, value, ex=ex, nx=nx),
             timeout_seconds=timeout,
@@ -411,14 +429,21 @@ class RedisClient:
     
     # ========== Stream Operations with Timeout ==========
     
-    async def stream_add(self, stream_key: str, fields: Dict[str, str], maxlen: int = None, 
-                        approximate: bool = True, timeout: Optional[float] = None, 
+    async def stream_add(self, stream_key: str, fields: Dict[str, str], maxlen: int = None,
+                        approximate: bool = True, timeout: Optional[float] = None,
                         fail_silently: bool = True) -> Optional[str]:
         """Add to stream with timeout protection."""
-        if self._initialized and self._client:
+        if self._initialized and self._client and self._redis_available:
             client = self._client
         else:
             client = await self.get_client()
+
+        if client is None:
+            if fail_silently:
+                logger.debug(f"Redis unavailable, cannot add to stream '{stream_key}'")
+                return None
+            else:
+                raise ConnectionError(f"Redis unavailable, cannot add to stream '{stream_key}'")
         kwargs = {}
         if maxlen is not None:
             kwargs['maxlen'] = maxlen

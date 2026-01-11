@@ -76,14 +76,19 @@ async def get_worker_metrics() -> dict:
         active_redis_streams = 0
         try:
             redis_client = await redis.get_client()
-            # Use SCAN to find all agent_run:*:stream keys (non-blocking)
-            cursor = 0
-            pattern = "agent_run:*:stream"
-            while True:
-                cursor, keys = await redis_client.scan(cursor, match=pattern, count=100)
-                active_redis_streams += len(keys)
-                if cursor == 0:
-                    break
+            if redis_client is None:
+                # Redis is not available, use DB count as fallback
+                logger.debug("Redis unavailable, using DB count for active streams")
+                active_redis_streams = active_agent_runs
+            else:
+                # Use SCAN to find all agent_run:*:stream keys (non-blocking)
+                cursor = 0
+                pattern = "agent_run:*:stream"
+                while True:
+                    cursor, keys = await redis_client.scan(cursor, match=pattern, count=100)
+                    active_redis_streams += len(keys)
+                    if cursor == 0:
+                        break
         except Exception as e:
             logger.warning(f"Failed to count Redis stream keys: {e}")
             # Fallback: use DB count if Redis fails

@@ -145,9 +145,12 @@ async def cleanup_orphaned_agent_runs(db_client) -> int:
                 # Clean up Redis keys for THIS run only
                 try:
                     redis_client = await redis.get_client()
-                    await redis_client.delete(f"stop:{agent_run_id}")
-                    await redis_client.delete(stream_key)
-                    logger.debug(f"🧹 Deleted Redis keys for orphaned run {agent_run_id}")
+                    if redis_client is None:
+                        logger.debug(f"Redis unavailable, skipping Redis cleanup for orphaned run {agent_run_id}")
+                    else:
+                        await redis_client.delete(f"stop:{agent_run_id}")
+                        await redis_client.delete(stream_key)
+                        logger.debug(f"🧹 Deleted Redis keys for orphaned run {agent_run_id}")
                 except Exception as e:
                     logger.warning(f"Failed to delete Redis keys for {agent_run_id}: {e}")
                 
