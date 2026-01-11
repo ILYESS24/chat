@@ -704,6 +704,7 @@ async def _convert_with_recraft(image_data_url: str) -> Optional[str]:
 def _convert_with_vtracer(png_bytes: bytes, colormode: str, mode: str) -> Optional[str]:
     """Fallback: convert using vtracer."""
     try:
+        # Vérifier si vtracer est disponible (peut ne pas être installé sur certains environnements)
         import vtracer
         return vtracer.convert_raw_image_to_svg(
             png_bytes,
@@ -720,6 +721,9 @@ def _convert_with_vtracer(png_bytes: bytes, colormode: str, mode: str) -> Option
             max_iterations=4,
             path_precision=2,
         )
+    except ImportError:
+        logger.warning("VTracer not available (dependency not installed)")
+        return None
     except Exception as e:
         logger.warning(f"VTracer fallback failed: {e}")
         return None

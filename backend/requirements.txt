@@ -41,7 +41,7 @@ phonenumbers==8.13.50
 prometheus-client==0.21.1
 langfuse==2.60.5
 Pillow>=10.4.0
-vtracer>=0.6.0
+# vtracer>=0.6.0  # Retiré car nécessite Rust (non supporté sur Render)
 replicate>=0.25.0
 mcp==1.9.4
 aiohttp==3.12.0
