@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build",
+  "buildOutputDirectory": ".next",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "pages_build_output_dir": ".next"
+}
