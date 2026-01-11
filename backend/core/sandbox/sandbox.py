@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from core.utils.logger import logger
 from core.utils.config import config
 import asyncio
+from typing import Optional
 
 load_dotenv()
 
@@ -23,19 +24,53 @@ try:
         daytona_available = True
         logger.info("Daytona sandbox configured successfully")
     else:
+        # Import des types pour les signatures de fonction même si Daytona n'est pas configuré
+        try:
+            from daytona_sdk import AsyncSandbox, SessionExecuteRequest, Resources, SandboxState
+            CreateSandboxFromSnapshotParams = None
+        except ImportError:
+            # Si le SDK n'est pas installé du tout
+            AsyncSandbox = type(None)  # Placeholder type
+            SessionExecuteRequest = type(None)
+            Resources = type(None)
+            SandboxState = type(None)
+            CreateSandboxFromSnapshotParams = type(None)
+        daytona = None
+        daytona_available = False
         logger.info("Daytona not configured - sandbox features will be disabled")
 
 except ImportError:
     logger.warning("Daytona SDK not available - sandbox features will be disabled")
+    # Définir des types placeholder
+    AsyncSandbox = type(None)
+    SessionExecuteRequest = type(None)
+    Resources = type(None)
+    SandboxState = type(None)
+    CreateSandboxFromSnapshotParams = type(None)
+    daytona = None
+    daytona_available = False
 except Exception as e:
     logger.error(f"Failed to initialize Daytona: {e}")
     logger.info("Sandbox features will be disabled")
+    # Définir des types placeholder en cas d'erreur
+    try:
+        from daytona_sdk import AsyncSandbox, SessionExecuteRequest, Resources, SandboxState
+        CreateSandboxFromSnapshotParams = None
+    except ImportError:
+        AsyncSandbox = type(None)
+        SessionExecuteRequest = type(None)
+        Resources = type(None)
+        SandboxState = type(None)
+        CreateSandboxFromSnapshotParams = type(None)
+    daytona = None
+    daytona_available = False
 
-async def get_or_start_sandbox(sandbox_id: str) -> AsyncSandbox:
+async def get_or_start_sandbox(sandbox_id: str):
     """Retrieve a sandbox by ID, check its state, and start it if needed."""
 
     if not daytona_available or daytona is None:
-        raise RuntimeError("Daytona sandbox is not configured or available")
+        logger.warning("Daytona not available - cannot get or start sandbox")
+        return None
 
     logger.info(f"Getting or starting sandbox with ID: {sandbox_id}")
 
@@ -85,11 +120,12 @@ async def start_supervisord_session(sandbox: AsyncSandbox):
         # Don't fail if supervisord already running
         logger.warning(f"Could not start supervisord: {str(e)}")
 
-async def create_sandbox(password: str, project_id: str = None) -> AsyncSandbox:
+async def create_sandbox(password: str, project_id: str = None):
     """Create a new sandbox with all required services configured and running."""
 
     if not daytona_available or daytona is None:
-        raise RuntimeError("Daytona sandbox is not configured or available")
+        logger.warning("Daytona not available - cannot create sandbox")
+        return None
 
     logger.info("Creating new Daytona sandbox environment")
     # logger.debug("Configuring sandbox with snapshot and environment variables")
@@ -141,6 +177,8 @@ async def delete_sandbox(sandbox_id: str) -> bool:
     if not daytona_available or daytona is None:
         logger.warning("Daytona not available - cannot delete sandbox")
         return False
+
+    try:
 
     logger.info(f"Deleting sandbox with ID: {sandbox_id}")
 
