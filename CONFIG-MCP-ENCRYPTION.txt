@@ -1,0 +1,33 @@
+# 🔐 CLÉ DE CHIFFREMENT MCP POUR KORTIX
+# COPIEZ CETTE VALEUR DANS VOTRE CONFIGURATION RENDER
+
+MCP_CREDENTIAL_ENCRYPTION_KEY=yqgU4135p^76XftzuO@Pk9wA*?DLi$%n
+
+# =============================================================================
+# INSTRUCTIONS POUR CONFIGURER DANS RENDER
+# =============================================================================
+
+1. Allez sur https://dashboard.render.com
+2. Sélectionnez votre service "kortix-backend"
+3. Onglet "Environment"
+4. Ajoutez une nouvelle variable :
+   - Key: MCP_CREDENTIAL_ENCRYPTION_KEY
+   - Value: yqgU4135p^76XftzuO@Pk9wA*?DLi$%n
+5. Cliquez "Save"
+6. Redéployez
+
+# =============================================================================
+# CETTE CLÉ EST :
+# ✅ Générée aléatoirement (32 caractères)
+# ✅ Sécurisée (lettres, chiffres, caractères spéciaux)
+# ✅ Unique à votre application
+# ⚠️  À GARDER SECRÈTE (ne partagez jamais cette valeur)
+# =============================================================================
+
+# Variables essentielles à configurer dans Render :
+# JWT_SECRET=id&zrgt@a%~y1cWRI_0hYPVs^?Fx$qS-oKB6wjX!4Z*H#e.Lb2pMu5QCG3Amfl7+
+# SUPABASE_URL=https://votre-projet.supabase.co
+# SUPABASE_ANON_KEY=votre_clé_supabase
+# OPENAI_API_KEY=sk-votre_clé_openai
+# STRIPE_SECRET_KEY=sk_votre_clé_stripe
+# MCP_CREDENTIAL_ENCRYPTION_KEY=yqgU4135p^76XftzuO@Pk9wA*?DLi$%n
