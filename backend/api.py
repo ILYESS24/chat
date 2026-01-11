@@ -268,7 +268,13 @@ async def log_requests_middleware(request: Request, call_next):
         raise
 
 # Define allowed origins based on environment
-allowed_origins = ["https://www.kortix.com", "https://kortix.com", "https://prod-test.kortix.com"]
+allowed_origins = [
+    "https://www.kortix.com",
+    "https://kortix.com",
+    "https://prod-test.kortix.com",
+    "https://9e0b8987.kortix-frontend-a5w.pages.dev",
+    "https://kortix-frontend.pages.dev"
+]
 allow_origin_regex = None
 
 # Add staging-specific origins
@@ -282,6 +288,10 @@ if config.ENV_MODE == EnvMode.STAGING:
     allowed_origins.append("http://localhost:3000")
     # Allow Vercel preview deployments
     allow_origin_regex = r"https://.*-kortixai\.vercel\.app"
+
+# Allow Cloudflare Pages deployments
+if config.ENV_MODE in [EnvMode.PRODUCTION, EnvMode.STAGING, EnvMode.DEVELOPMENT]:
+    allow_origin_regex = r"https://.*\.pages\.dev" if allow_origin_regex is None else f"{allow_origin_regex}|https://.*\.pages\.dev"
 
 app.add_middleware(
     CORSMiddleware,
