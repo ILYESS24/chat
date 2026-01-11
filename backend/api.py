@@ -83,10 +83,17 @@ async def lifespan(app: FastAPI):
         from core.services.db import init_db
         await init_db()
         
-        # Pre-load tool classes and schemas to avoid first-request delay
-        from core.utils.tool_discovery import warm_up_tools_cache
-        warm_up_tools_cache()
-        
+        # Check if we're on Render (low memory environment)
+        is_render = os.getenv("RENDER", "").lower() == "true" or os.getenv("RENDER_SERVICE_ID", "")
+
+        if not is_render:
+            # Pre-load tool classes and schemas to avoid first-request delay (only on non-Render)
+            from core.utils.tool_discovery import warm_up_tools_cache
+            warm_up_tools_cache()
+            logger.info("🔥 Tools cache warmed up (full preload)")
+        else:
+            logger.info("🎯 Render detected - skipping tools cache warmup (memory optimization)")
+
         # Pre-load static Suna config for fast path in API requests
         from core.cache.runtime_cache import load_static_suna_config
         load_static_suna_config()
@@ -534,7 +541,21 @@ if __name__ == "__main__":
     
     # Enable reload mode for local and staging environments
     is_dev_env = config.ENV_MODE in [EnvMode.LOCAL, EnvMode.STAGING]
-    workers = 1 if is_dev_env else 4
+
+    # Memory-optimized worker configuration for Render 512MB limit
+    if is_dev_env:
+        workers = 1
+    else:
+        # Check if we're on Render (low memory environment)
+        is_render = os.getenv("RENDER", "").lower() == "true" or os.getenv("RENDER_SERVICE_ID", "")
+        if is_render:
+            # Ultra-conservative for Render 512MB
+            workers = 1
+            logger.info("🎯 Render detected - using 1 worker for memory optimization")
+        else:
+            # Standard production (4 workers)
+            workers = 4
+
     reload = is_dev_env
     
     logger.debug(f"Starting server on 0.0.0.0:8000 with {workers} workers (reload={reload})")

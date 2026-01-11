@@ -59,14 +59,14 @@ def _get_db_config():
             "connect_timeout": 5,
         }
     else:
-        # Unified config for staging AND production
+        # Unified config for staging AND production - MEMORY OPTIMIZED
         return {
-            "pool_size": 3,           # 3 per worker (conservative)
-            "max_overflow": 7,        # Allow burst to 10 per worker (increased from 5)
-            "pool_timeout": 30,       # Wait up to 30s for connection (increased from 10)
-            "pool_recycle": 300,      # Recycle connections every 5 min
-            "statement_timeout": 30000,  # 30s query timeout
-            "connect_timeout": 15,    # 15s connection timeout (increased from 10)
+            "pool_size": 1,           # 1 per worker (ultra-conservative for Render 512MB)
+            "max_overflow": 2,        # Allow burst to 3 per worker (reduced from 7)
+            "pool_timeout": 15,       # Wait up to 15s for connection (reduced from 30)
+            "pool_recycle": 600,      # Recycle connections every 10 min (increased from 300)
+            "statement_timeout": 20000,  # 20s query timeout (reduced from 30000)
+            "connect_timeout": 10,    # 10s connection timeout (reduced from 15)
         }
 
 _db_config = _get_db_config()
